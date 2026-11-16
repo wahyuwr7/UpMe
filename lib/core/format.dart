@@ -44,16 +44,54 @@ class Money {
     return '$sign${config.symbol}${f.format(abs).trim()}';
   }
 
+  /// Thousands separator of the selected currency's locale ("." for IDR, "," for USD).
+  static String get groupSeparator => NumberFormat.decimalPattern(config.locale).symbols.GROUP_SEP;
+  static String get decimalSeparator => NumberFormat.decimalPattern(config.locale).symbols.DECIMAL_SEP;
+
+  /// Value as it should appear inside an amount text field (grouped every 3 digits).
+  static String input(double v) {
+    final raw = v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(config.decimals);
+    return groupDigits(raw.replaceAll('.', decimalSeparator), groupSeparator, decimalSeparator);
+  }
+
   static String plain(double v) {
     final f = NumberFormat.decimalPatternDigits(locale: config.locale, decimalDigits: config.decimals);
     return f.format(v);
   }
 }
 
+/// Regroups every number in [text] with [group] every 3 digits, keeping the first
+/// [decimal] separator, letters (25k, 1,5jt) and operators (+/-) untouched.
+String groupDigits(String text, String group, String decimal) {
+  final token = RegExp('[0-9${RegExp.escape(group)}${RegExp.escape(decimal)}]+');
+  return text.replaceAllMapped(token, (m) {
+    final t = m[0]!.replaceAll(group, '');
+    final i = t.indexOf(decimal);
+    var intPart = i < 0 ? t : t.substring(0, i);
+    final frac = i < 0 ? null : t.substring(i + 1).replaceAll(decimal, '');
+    intPart = intPart.replaceFirst(RegExp(r'^0+(?=\d)'), '');
+    if (intPart.isEmpty && frac == null) return '';
+    if (intPart.isEmpty) intPart = '0';
+    final b = StringBuffer();
+    for (var k = 0; k < intPart.length; k++) {
+      if (k > 0 && (intPart.length - k) % 3 == 0) b.write(group);
+      b.write(intPart[k]);
+    }
+    return frac == null ? '$b' : '$b$decimal$frac';
+  });
+}
+
+/// Parses an amount field formatted with the current currency's separators.
+double? parseAmountField(String text) =>
+    parseAmountInput(text, groupSep: Money.groupSeparator, decimalSep: Money.decimalSeparator);
+
 /// Parses a number written the way humans write money, in any locale:
 /// `1.250.000,50`, `1,250,000.50`, `1.500`, `12,5`, `25k`, `1.5jt`, `10rb`, `2m`.
 /// Supports `+`/`-` so `25k+12k` works in the amount field. Returns null if unparseable.
-double? parseAmountInput(String input) {
+///
+/// When [groupSep]/[decimalSep] are given (text typed into a formatted field)
+/// they are trusted exactly instead of guessed.
+double? parseAmountInput(String input, {String? groupSep, String? decimalSep}) {
   final s = input.toLowerCase().replaceAll(RegExp(r'[^0-9.,+\-kmbjtr ]'), '').replaceAll(' ', '');
   if (s.isEmpty) return null;
   final parts = RegExp(r'[+\-]?[^+\-]+').allMatches(s).map((m) => m.group(0)!).toList();
@@ -79,7 +117,9 @@ double? parseAmountInput(String input) {
       };
       p = p.substring(0, suffix.start);
     }
-    final n = parseLocalizedNumber(p, preferDecimal: mult > 1);
+    final n = (groupSep != null && decimalSep != null)
+        ? double.tryParse(p.replaceAll(groupSep, '').replaceAll(decimalSep, '.'))
+        : parseLocalizedNumber(p, preferDecimal: mult > 1);
     if (n == null) return null;
     total += sign * n * mult;
   }

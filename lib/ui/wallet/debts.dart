@@ -6,6 +6,7 @@ import '../../core/format.dart';
 import '../../data/models.dart';
 import '../../data/repository.dart';
 import '../widgets/common.dart';
+import '../widgets/amount_formatter.dart';
 
 class DebtsTab extends StatelessWidget {
   const DebtsTab({super.key});
@@ -180,7 +181,7 @@ Future<int?> _pickAccount(BuildContext context, String title) {
 Future<void> showDebtSheet(BuildContext context, {Debt? existing}) {
   final repo = context.read<FinanceRepository>();
   final person = TextEditingController(text: existing?.person ?? '');
-  final amount = TextEditingController(text: existing == null ? '' : Money.plain(existing.amount));
+  final amount = TextEditingController(text: existing == null ? '' : Money.input(existing.amount));
   final note = TextEditingController(text: existing?.note ?? '');
   var direction = existing?.direction ?? DebtDirection.iOwe;
   DateTime? due = existing?.dueDate;
@@ -210,6 +211,7 @@ Future<void> showDebtSheet(BuildContext context, {Debt? existing}) {
             TextField(
               controller: amount,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [AmountInputFormatter()],
               decoration: InputDecoration(labelText: 'Amount', prefixText: '${Money.config.symbol} '),
             ),
             const SizedBox(height: 12),
@@ -230,7 +232,7 @@ Future<void> showDebtSheet(BuildContext context, {Debt? existing}) {
             FilledButton(
               style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
               onPressed: () async {
-                final v = parseAmountInput(amount.text);
+                final v = parseAmountField(amount.text);
                 if (person.text.trim().isEmpty || v == null || v <= 0) return;
                 int? accountId;
                 if (existing == null) {

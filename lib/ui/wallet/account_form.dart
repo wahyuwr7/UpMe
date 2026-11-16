@@ -7,6 +7,7 @@ import '../../data/models.dart';
 import '../../data/repository.dart';
 import '../../platform/capture_bridge.dart';
 import '../widgets/common.dart';
+import '../widgets/amount_formatter.dart';
 
 class AccountFormScreen extends StatefulWidget {
   const AccountFormScreen({super.key, this.account});
@@ -21,9 +22,9 @@ class _AccountFormScreenState extends State<AccountFormScreen> {
   late final _balance = TextEditingController(
       text: widget.account == null
           ? ''
-          : Money.plain(widget.account!.isCreditCard ? -widget.account!.initialBalance : widget.account!.initialBalance));
+          : Money.input(widget.account!.isCreditCard ? -widget.account!.initialBalance : widget.account!.initialBalance));
   late final _limit = TextEditingController(
-      text: (widget.account?.creditLimit ?? 0) == 0 ? '' : Money.plain(widget.account!.creditLimit));
+      text: (widget.account?.creditLimit ?? 0) == 0 ? '' : Money.input(widget.account!.creditLimit));
   late final _last4 = TextEditingController(text: widget.account?.last4 ?? '');
   late final _keywords = TextEditingController(text: widget.account?.keywords.join(', ') ?? '');
   late AccountType _type = widget.account?.type ?? AccountType.bank;
@@ -44,13 +45,13 @@ class _AccountFormScreenState extends State<AccountFormScreen> {
   Future<void> _save() async {
     final repo = context.read<FinanceRepository>();
     if (_name.text.trim().isEmpty) return;
-    final entered = parseAmountInput(_balance.text) ?? 0;
+    final entered = parseAmountField(_balance.text) ?? 0;
     await repo.saveAccount(Account(
       id: widget.account?.id,
       name: _name.text.trim(),
       type: _type,
       initialBalance: _type == AccountType.creditCard ? -entered.abs() : entered,
-      creditLimit: _type == AccountType.creditCard ? (parseAmountInput(_limit.text) ?? 0) : 0,
+      creditLimit: _type == AccountType.creditCard ? (parseAmountField(_limit.text) ?? 0) : 0,
       last4: _last4.text.trim(),
       color: _color,
       packages: _packages.toList(),
@@ -116,6 +117,7 @@ class _AccountFormScreenState extends State<AccountFormScreen> {
           TextField(
             controller: _balance,
             keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+            inputFormatters: [AmountInputFormatter()],
             decoration: InputDecoration(
               labelText: _type == AccountType.creditCard ? 'Current outstanding (what you owe)' : 'Starting balance',
               helperText: _editing ? 'Tip: use "Set actual balance" on the account page instead.' : null,
@@ -127,6 +129,7 @@ class _AccountFormScreenState extends State<AccountFormScreen> {
             TextField(
               controller: _limit,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [AmountInputFormatter()],
               decoration: InputDecoration(labelText: 'Credit limit', prefixText: '${Money.config.symbol} '),
             ),
           ],

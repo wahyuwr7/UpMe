@@ -6,6 +6,7 @@ import '../../core/settings.dart';
 import '../../data/models.dart';
 import '../../data/repository.dart';
 import '../widgets/common.dart';
+import '../widgets/amount_formatter.dart';
 
 /// Mutable form state for a transaction being created/edited/confirmed.
 class TxnDraft {
@@ -109,7 +110,7 @@ class _TxnEditorState extends State<TxnEditor> {
   @override
   void initState() {
     super.initState();
-    _amount = TextEditingController(text: d.amount == null ? '' : Money.plain(d.amount!));
+    _amount = TextEditingController(text: d.amount == null ? '' : Money.input(d.amount!));
     _merchant = TextEditingController(text: d.merchant);
     _note = TextEditingController(text: d.note);
     final repo = context.read<FinanceRepository>();
@@ -139,7 +140,7 @@ class _TxnEditorState extends State<TxnEditor> {
   }
 
   Future<void> _submit() async {
-    d.amount = parseAmountInput(_amount.text);
+    d.amount = parseAmountField(_amount.text);
     d.merchant = _merchant.text;
     d.note = _note.text;
     final err = d.validate();
@@ -198,13 +199,14 @@ class _TxnEditorState extends State<TxnEditor> {
           controller: _amount,
           autofocus: widget.autofocusAmount,
           keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+          inputFormatters: [AmountInputFormatter()],
           style: TextStyle(fontSize: 34, fontWeight: FontWeight.w700, color: color),
           decoration: InputDecoration(
             prefixText: '${Money.config.symbol} ',
             prefixStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color),
             hintText: '0',
             border: InputBorder.none,
-            helperText: 'Tip: 25k, 1.5jt, 12k+8k all work',
+            helperText: 'Tip: 25k, 1${Money.decimalSeparator}5jt, 12k+8k all work',
             helperStyle: TextStyle(color: cs.outline),
           ),
           onSubmitted: (_) => _submit(),

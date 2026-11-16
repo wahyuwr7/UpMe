@@ -5,6 +5,7 @@ import '../../core/format.dart';
 import '../../core/settings.dart';
 import '../../data/models.dart';
 import '../../data/repository.dart';
+import 'amount_formatter.dart';
 
 const incomeColor = Color(0xFF1E9E5A);
 const expenseColor = Color(0xFFE5484D);
@@ -186,7 +187,7 @@ Future<bool> confirmDialog(BuildContext context, String title, String message, {
 
 /// Bottom sheet with a money field, used for "update value", "adjust balance", "add payment".
 Future<double?> askAmount(BuildContext context, {required String title, double? initial, String? hint}) {
-  final ctrl = TextEditingController(text: initial == null ? '' : Money.plain(initial));
+  final ctrl = TextEditingController(text: initial == null ? '' : Money.input(initial));
   return showModalBottomSheet<double>(
     context: context,
     isScrollControlled: true,
@@ -201,11 +202,12 @@ Future<double?> askAmount(BuildContext context, {required String title, double? 
           controller: ctrl,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+          inputFormatters: [AmountInputFormatter()],
           decoration: InputDecoration(prefixText: '${Money.config.symbol} ', border: const OutlineInputBorder()),
-          onSubmitted: (v) => Navigator.pop(c, parseAmountInput(v)),
+          onSubmitted: (v) => Navigator.pop(c, parseAmountField(v)),
         ),
         const SizedBox(height: 12),
-        FilledButton(onPressed: () => Navigator.pop(c, parseAmountInput(ctrl.text)), child: const Text('Save')),
+        FilledButton(onPressed: () => Navigator.pop(c, parseAmountField(ctrl.text)), child: const Text('Save')),
       ]),
     ),
   );

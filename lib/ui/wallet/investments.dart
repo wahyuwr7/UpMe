@@ -5,6 +5,7 @@ import '../../core/format.dart';
 import '../../data/models.dart';
 import '../../data/repository.dart';
 import '../widgets/common.dart';
+import '../widgets/amount_formatter.dart';
 
 class InvestmentsTab extends StatelessWidget {
   const InvestmentsTab({super.key});
@@ -79,8 +80,8 @@ class InvestmentsTab extends StatelessWidget {
 Future<void> showInvestmentSheet(BuildContext context, {Investment? existing}) {
   final repo = context.read<FinanceRepository>();
   final name = TextEditingController(text: existing?.name ?? '');
-  final invested = TextEditingController(text: existing == null ? '' : Money.plain(existing.invested));
-  final current = TextEditingController(text: existing == null ? '' : Money.plain(existing.currentValue));
+  final invested = TextEditingController(text: existing == null ? '' : Money.input(existing.invested));
+  final current = TextEditingController(text: existing == null ? '' : Money.input(existing.currentValue));
   var kind = existing?.kind ?? InvestmentKind.stock;
   return showModalBottomSheet(
     context: context,
@@ -103,12 +104,14 @@ Future<void> showInvestmentSheet(BuildContext context, {Investment? existing}) {
             TextField(
               controller: invested,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [AmountInputFormatter()],
               decoration: InputDecoration(labelText: 'Total invested (cost)', prefixText: '${Money.config.symbol} '),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: current,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [AmountInputFormatter()],
               decoration: InputDecoration(
                 labelText: 'Current value',
                 helperText: 'Leave empty to use the invested amount',
@@ -132,14 +135,14 @@ Future<void> showInvestmentSheet(BuildContext context, {Investment? existing}) {
                 child: FilledButton(
                   style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(48)),
                   onPressed: () async {
-                    final inv = parseAmountInput(invested.text) ?? 0;
+                    final inv = parseAmountField(invested.text) ?? 0;
                     if (name.text.trim().isEmpty) return;
                     await repo.saveInvestment(Investment(
                       id: existing?.id,
                       name: name.text.trim(),
                       kind: kind,
                       invested: inv,
-                      currentValue: parseAmountInput(current.text) ?? inv,
+                      currentValue: parseAmountField(current.text) ?? inv,
                       note: existing?.note ?? '',
                       updatedAt: DateTime.now(),
                     ));
