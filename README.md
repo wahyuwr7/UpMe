@@ -103,4 +103,14 @@ flutter run            # on an Android device for auto-capture
 
 Then open *Settings → Auto-capture* and grant the two permissions. Add your accounts in *Wallet*. Linking an account to its bank app, or entering its last 4 digits, makes account matching much more reliable.
 
+### Releases
+
+Pushing a `v*` tag runs `.github/workflows/release-android.yml`: tests, then an **arm64-v8a** APK built with
+`--obfuscate --split-debug-info` (Dart) and R8 minify + resource shrinking (Android), published as a GitHub pre-release
+with the debug-symbols zip.
+
+For a stable signing key (so updates install over the previous build), add repo secrets
+`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`.
+Without them the APK is signed with the CI runner's throwaway debug key.
+
 > **Battery-saver note:** Xiaomi, Oppo, Vivo and some Samsung phones kill background services. If capture stops, set UpMe's battery usage to *Unrestricted* and allow autostart.

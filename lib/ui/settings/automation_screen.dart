@@ -84,6 +84,15 @@ class _AutomationScreenState extends State<AutomationScreen> with WidgetsBinding
       const SectionHeader('Permissions'),
       step(1, 'Notification access', 'Lets UpMe read transaction notifications. Nothing leaves your phone.',
           st.notificationAccess, CaptureBridge.openNotificationAccess),
+      if (!st.notificationAccess)
+        const Padding(
+          padding: EdgeInsets.fromLTRB(72, 0, 20, 8),
+          child: Text(
+            'Greyed out / "Restricted setting"? Installed outside Play Store: open Settings → Apps → UpMe → '
+            '⋮ (top right) → Allow restricted settings, then try again.',
+            style: TextStyle(fontSize: 12),
+          ),
+        ),
       step(2, 'Display over other apps', 'Shows the confirm popup right where you are.', st.overlay,
           CaptureBridge.openOverlaySettings),
       step(3, 'Notifications (optional)', 'Fallback "tap to log" notification when the popup is off.',
@@ -133,8 +142,8 @@ class _AutomationScreenState extends State<AutomationScreen> with WidgetsBinding
       const Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Text(
-          'Tip: some phones (Xiaomi, Oppo, Vivo, Samsung) kill background services. '
-          'If capture stops working, set UpMe battery usage to "Unrestricted" and allow autostart.',
+          'Tip: some phones (Vivo, Xiaomi, Oppo, Samsung) kill background services. If capture stops working, '
+          'allow UpMe background power use / "Unrestricted" battery, turn on Auto-start, and lock it in recents.',
           style: TextStyle(fontSize: 12),
         ),
       ),
