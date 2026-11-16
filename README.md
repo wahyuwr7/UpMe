@@ -105,7 +105,7 @@ Then open *Settings → Auto-capture* and grant the two permissions. Add your ac
 
 ### Releases
 
-Pushing a `v*` tag runs `.github/workflows/release-android.yml`: tests, then an **arm64-v8a** APK built with
+Pushing a `v*` tag (or a commit whose message contains `[release]`, which tags it with the `pubspec.yaml` version) runs `.github/workflows/release-android.yml`: tests, then an **arm64-v8a** APK built with
 `--obfuscate --split-debug-info` (Dart) and R8 minify + resource shrinking (Android), published as a GitHub pre-release
 with the debug-symbols zip.
 
