@@ -21,6 +21,7 @@ class FinanceRepository extends ChangeNotifier {
   FinanceRepository(this._appDb);
   final AppDatabase _appDb;
   Database get _db => _appDb.db;
+  AppDatabase get database => _appDb;
 
   List<Account> accounts = [];
   List<Category> categories = [];

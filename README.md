@@ -75,6 +75,7 @@ The same confirm sheet opens, pre-filled by the brain. Step-by-step instructions
 - **Credit cards**: purchases are expenses on the card; paying the card is a transfer from your bank.
 - **Investments**: invested vs current value, gain %, quick "update value".
 - **Debts**: I owe / owed to me, due dates, partial payments, optionally reflected in an account. Excluded from spending charts.
+- **Backup & restore**: one JSON file with every table plus your settings (currency, theme, muted apps). Save it via the system file dialog or share it to Drive or chat. Restore is atomic: a broken file changes nothing.
 - **Inbox** for postponed captures, **hide amounts** toggle, light/dark theme, 11 currencies, editable categories.
 
 ## Project layout

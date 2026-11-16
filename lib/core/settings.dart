@@ -30,6 +30,32 @@ class AppSettings extends ChangeNotifier {
     notifyListeners();
   }
 
+  DateTime? get lastBackupAt {
+    final ms = _prefs.getInt('lastBackup');
+    return ms == null ? null : DateTime.fromMillisecondsSinceEpoch(ms);
+  }
+
+  set lastBackupAt(DateTime? d) {
+    d == null ? _prefs.remove('lastBackup') : _prefs.setInt('lastBackup', d.millisecondsSinceEpoch);
+    notifyListeners();
+  }
+
+  Map<String, Object?> toBackup() => {
+        'currency': currency.code,
+        'theme': themeMode.name,
+        'hideAmounts': hideAmounts,
+        'lastAccountId': lastAccountId,
+      };
+
+  void restoreBackup(Map<String, dynamic> m) {
+    if (m['currency'] is String) currency = CurrencyConfig.byCode(m['currency'] as String);
+    if (m['theme'] is String && ThemeMode.values.any((t) => t.name == m['theme'])) {
+      themeMode = ThemeMode.values.byName(m['theme'] as String);
+    }
+    if (m['hideAmounts'] is bool) hideAmounts = m['hideAmounts'] as bool;
+    lastAccountId = m['lastAccountId'] as int?;
+  }
+
   int? get lastAccountId => _prefs.getInt('lastAccount');
   set lastAccountId(int? id) => id == null ? _prefs.remove('lastAccount') : _prefs.setInt('lastAccount', id);
 }

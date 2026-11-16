@@ -8,6 +8,7 @@ import '../../platform/capture_bridge.dart';
 import '../capture/inbox_screen.dart';
 import '../widgets/common.dart';
 import 'automation_screen.dart';
+import 'backup_screen.dart';
 import 'brain_playground.dart';
 import 'categories_screen.dart';
 
@@ -44,6 +45,16 @@ class SettingsScreen extends StatelessWidget {
           subtitle: Text('Test a notification · ${repo.rules.length} things learned'),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => push(const BrainPlayground()),
+        ),
+        const SectionHeader('Data'),
+        ListTile(
+          leading: const Icon(Icons.backup_outlined),
+          title: const Text('Backup & restore'),
+          subtitle: Text(s.lastBackupAt == null
+              ? 'No backup yet'
+              : 'Last backup ${dayLabel(s.lastBackupAt!)}'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => push(const BackupScreen()),
         ),
         const SectionHeader('General'),
         ListTile(
