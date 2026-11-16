@@ -1,5 +1,11 @@
 Early test build: **not 1.0 yet**. Expect rough edges.
 
+### What's new in alpha.2
+- **Backup & restore** (Settings → Data): save or share one file with all your data and settings; restore replaces everything.
+- **Automatic thousands separator** in every amount field (1.250.000), shortcuts like `25k` / `1,5jt` still work.
+
+⚠️ Signed with a temporary key: **uninstall the previous alpha first**, then restore your backup.
+
 **Download:** `upme-*-arm64-v8a.apk` (64-bit ARM only, so it works on any modern phone).
 `*-debug-symbols.zip` is only needed to decode crash stack traces (the Dart code is obfuscated).
 
